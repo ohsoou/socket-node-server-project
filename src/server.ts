@@ -5,27 +5,26 @@ import redisServer from "./redis-server";
 import {CONFIG} from "./constants/config";
 import monitoringListeners from "./listeners/monitoringListeners";
 
-
-const app:Express = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-    transports: ["websocket"],
-    path: "/socket.io"
-});
-
-(async() => {
+(async () => {
     await redisServer.onConnect()
     await redisServer.initRedisViewer()
-})();
 
-const roomNamespace = io.of(/^\/room\/\d+$/)
+    const app: Express = express();
+    const httpServer = createServer(app);
+    const io = new Server(httpServer, {
+        transports: ["websocket"],
+        path: "/socket.io"
+    });
+
+    const roomNamespace = io.of(/^\/room\/\d+$/)
 // const roomNamespace = io.of('/room')
 
-roomNamespace.on("connection", (socket) => {
-    console.log("connected socketId:" + socket.id);
-    monitoringListeners(io, socket)
-})
+    roomNamespace.on("connection", (socket) => {
+        console.log("connected socketId:" + socket.id);
+        monitoringListeners(io, socket)
+    })
+
+    httpServer.listen(CONFIG.WS.PORT);
+})();
 
 
-
-httpServer.listen(CONFIG.WS.PORT);
