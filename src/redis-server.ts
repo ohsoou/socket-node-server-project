@@ -1,9 +1,9 @@
 import {createClient} from "redis";
-import {redisConfig} from "./config";
 import {SocketData} from "./types/socketIo";
+import {CONFIG} from "./constants/config";
 
 const redisClient = createClient({
-    url: `redis://${redisConfig.host}:${redisConfig.port}/0`,
+    url: `redis://${CONFIG.REDIS.HOST}:${CONFIG.REDIS.PORT}/0`,
     legacyMode: false
 })
 
@@ -26,7 +26,7 @@ const deleteAllMatchedKeys = (pattern: string) => {
             return recursiveFn();
         }
     }
-    recursiveFn()
+    recursiveFn().then()
 }
 const getRedisKey = (value: string) => `visitor:${value}`
 const onConnect = () => redisClient.connect().then(() => console.log("Redis client connected"))
