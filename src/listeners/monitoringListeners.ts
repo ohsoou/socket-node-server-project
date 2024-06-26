@@ -7,7 +7,7 @@ export default (io: Server, socket: Socket) => {
     const onViewerReceived = async (data: SocketEventData) => {
         const socketData:SocketData = {
             socketId: socket.id,
-            namespace: socket.nsp.name,
+            namespace: `${socket.nsp.name.split(/(\/\w*)/)[1]}:${data.room}`,
             clientId: data.userKey
         }
 
@@ -28,7 +28,7 @@ export default (io: Server, socket: Socket) => {
 
         const socketData:SocketData = {
             socketId: socket.id,
-            namespace: socket.nsp.name,
+            namespace: `${socket.nsp.name.split(/(\/\w*)/)[1]}:${socket.data.room}`,
             clientId: socket.data.userKey
         }
         socket.leave(socket.data.room);
