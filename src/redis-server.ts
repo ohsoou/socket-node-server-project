@@ -32,7 +32,9 @@ const getRedisKey = (value: string) => `visitor:${value}`
 const onConnect = () => redisClient.connect().then(() => console.log("Redis client connected"))
 const getRealViewers = async (data: SocketData) => {
     const socketIdList = await redisClient.sMembers(getRedisKey(data.namespace))
-    const clientIdList = await Promise.all(socketIdList.map((socketId) => redisClient.hGet(getRedisKey(socketId), 'clientId')))
+    const clientIdList = await Promise.all(socketIdList.map((socketId) => redisClient.hGet(getRedisKey(socketId), 'clientId').then(clientId => clientId || socketId)))
+
+    console.log(">>>>>>>>>>>", clientIdList)
 
     return new Set(clientIdList).size
 }
