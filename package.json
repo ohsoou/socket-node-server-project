@@ -26,7 +26,7 @@
   },
   "scripts": {
     "start:local": "ts-node src/server.ts",
-    "start-redis:local": "ts-node src/redis-server.ts",
+    "start-cluster:local": "ts-node src/cluster-server.ts",
     "build": "tsc -p .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
