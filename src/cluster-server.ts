@@ -12,13 +12,11 @@ import {createClient} from "redis";
 import {createShardedAdapter} from "@socket.io/redis-adapter";
 
 (async () => {
-    await redisServer.onConnect()
-    await redisServer.initRedisViewer()
-
     const CPU_NUMBER = cpus().length
-
+    await redisServer.onConnect()
     if (cluster.isPrimary) {
         console.log(`Master ${process.pid} is running`);
+        await redisServer.initRedisViewer()
 
         const httpServer = createServer(express());
 
@@ -30,7 +28,7 @@ import {createShardedAdapter} from "@socket.io/redis-adapter";
 
         httpServer.listen(CONFIG.WS.PORT);
 
-        for (let i = 0; i < CPU_NUMBER; i++) {
+        for (let i = 0; i < 5; i++) {
             cluster.fork();
         }
 
