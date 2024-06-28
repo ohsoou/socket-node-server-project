@@ -21,7 +21,7 @@
     "typescript": "^5.5.2"
   },
   "scripts": {
-    "start": "ts-node src/server.ts",
+    "start:local": "ts-node src/server.ts",
     "build": "tsc -p .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

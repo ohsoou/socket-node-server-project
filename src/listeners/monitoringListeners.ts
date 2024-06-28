@@ -5,41 +5,21 @@ import redisServer from "../redis-server";
 
 export default (io: Server, socket: Socket) => {
     const onViewerReceived = async (data: SocketEventData) => {
-        const socketData:SocketData = {
-            socketId: socket.id,
-            namespace: `${socket.nsp.name.split(/(\/\w*)/)[1]}:${data.room}`,
-            clientId: data.userKey
-        }
-
         socket.data = data
         socket.join(data.room);
 
-        // :: redis get real viewer
-        await redisServer.saveViewerData(socketData)
-        const count = await redisServer.getRealViewers(socketData)
+        const count = await basicVersion.received(socket)
+        // const count = await simpleVersion.received(socket)
 
-        // :: get viewer connected socket
-        // const allSockets = await socket.nsp.fetchSockets();
-        // const count = allSockets.length
         socket.nsp.emit(SOCKET.EVENT.GET_COUNT, count);
     }
     const onViewerLeaved = async () => {
         console.log("disconnected socketId:" + socket.id);
-
-        const socketData:SocketData = {
-            socketId: socket.id,
-            namespace: `${socket.nsp.name.split(/(\/\w*)/)[1]}:${socket.data.room}`,
-            clientId: socket.data.userKey
-        }
         socket.leave(socket.data.room);
 
-        // :: redis get real viewer
-        await redisServer.deleteViewerData(socketData)
-        const count = await redisServer.getRealViewers(socketData)
+        const count = await basicVersion.leaved(socket)
+        // const count = await simpleVersion.leaved(socket)
 
-        // :: get viewer connected socket
-        // const allSockets = await socket.nsp.fetchSockets();
-        // const count = allSockets.length
         socket.nsp.emit(SOCKET.EVENT.GET_COUNT, count);
     }
 
@@ -47,5 +27,39 @@ export default (io: Server, socket: Socket) => {
     socket.on(SOCKET.DISCONNECT, onViewerLeaved)
 }
 
+// :: get viewer connected socket
+const simpleVersion = {
+    received: async (socket: Socket) => {
+        const allSockets = await socket.nsp.fetchSockets();
+        return allSockets.length
+    },
+    leaved: async (socket: Socket) => {
+        const allSockets = await socket.nsp.fetchSockets();
+        return allSockets.length
+    }
+}
+// :: redis get real viewer
+const basicVersion = {
+    received: async (socket: Socket) => {
+        const socketData:SocketData = {
+            socketId: socket.id,
+            namespace: `${socket.nsp.name.split(/(\/\w*)/)[1]}:${socket.data.room}`,
+            clientId: socket.data.userKey
+        }
+
+        await redisServer.saveViewerData(socketData)
+        return await redisServer.getRealViewers(socketData)
+    },
+    leaved: async (socket: Socket) => {
+        const socketData:SocketData = {
+            socketId: socket.id,
+            namespace: `${socket.nsp.name.split(/(\/\w*)/)[1]}:${socket.data.room}`,
+            clientId: socket.data.userKey
+        }
+
+        await redisServer.deleteViewerData(socketData)
+        return await redisServer.getRealViewers(socketData)
+    }
+}
 
 
